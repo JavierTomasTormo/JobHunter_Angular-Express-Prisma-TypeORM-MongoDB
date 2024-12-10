@@ -1,0 +1,55 @@
+<header class="header">
+  <div class="header-content">
+    <a href="/" class="header-logo">
+      <img src="../../../../../../logo.PNG" alt="Logo" class="logo">
+    </a>
+    <button class="menu-toggle" (click)="toggleMenu()">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+    <nav class="header-nav" [class.active]="isMenuOpen">
+      <a routerLink="/home" routerLinkActive="active">Home</a>
+      <a routerLink="/shop" routerLinkActive="active">Jobs</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+
+      <!-- Verificación de tipo de usuario para Enterprise -->
+      <!-- <ng-container *ngIf="currentUser && currentUser.usertype === 'enterprise'">
+        <a routerLink="/enterprise-dashboard" routerLinkActive="active">Dashboard</a>
+      </ng-container>   -->
+
+      <!-- Verificación de tipo de usuario para Admin -->
+      <ng-container *ngIf="currentUser && currentUser.usertype === 'admin'">
+        <a routerLink="/admin-dashboard" routerLinkActive="active">Admin Dashboard</a>
+      </ng-container>
+    </nav>
+
+    <div class="header-icons">
+      <ng-container *ngIf="!currentUser; else authenticated">
+        <a class="nav-link" routerLink="/login" routerLinkActive="active">
+          Sign in
+        </a>
+      </ng-container>
+
+      <ng-template #authenticated>
+
+        <ng-container *ngIf="currentUser?.usertype === 'enterprise'">
+          <a class="nav-link" routerLink="/enterprise-dashboard" routerLinkActive="active">Dashboard</a>
+        </ng-container>      
+        
+        <ng-container *ngIf="currentUser?.usertype === 'admin'">
+          <a class="nav-link" routerLink="/admin-dashboard" routerLinkActive="active">Adm-Dashboard</a>
+        </ng-container>
+        
+        <ng-container *ngIf="currentUser?.usertype !== 'enterprise' && currentUser?.usertype !== 'admin'">
+          <a class="nav-link" routerLink="/profile" routerLinkActive="active">Profile</a>
+        </ng-container>
+
+
+        <a class="nav-link logout" (click)="logout()">
+          Log out
+        </a>
+      </ng-template>
+    </div>  </div>
+</header>

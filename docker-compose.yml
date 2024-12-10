@@ -1,0 +1,103 @@
+# version: '3.8'  
+
+services:
+  mongo:
+    image: mongo:5.0.0
+    container_name: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+    command: ["mongod", "--bind_ip_all", "--replSet", "rs0"]
+    networks:
+      - app-network
+      
+# -------
+  backend:
+    build:  
+      context: .  
+      dockerfile: backend/Dockerfile 
+    container_name: backend
+    restart: always
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${NODE_PORT}
+      MONGO_URI: mongodb://mongo:27017/${MONGO_DB}?replicaSet=rs0
+      CORSURL: http://localhost:${ANGULAR_PORT}
+      DUMMY_PRODUCTS: 50
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET}
+      REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET}
+      ACCESS_TOKEN_INTERVAL: ${ACCESS_TOKEN_INTERVAL}
+      REFRESH_TOKEN_INTERVAL: ${REFRESH_TOKEN_INTERVAL}
+    ports:
+      - "3001:3001" 
+    depends_on:
+      - mongo  
+    volumes:
+      - ./backend:/home/node/app 
+      - ./prisma:/home/node/prisma 
+    networks:
+      - app-network
+
+# -------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: always
+    ports:
+      - "${ANGULAR_PORT}:4200"
+    networks:
+      - app-network
+
+# -------
+  prisma:
+    build:
+      context: ./prisma
+      dockerfile: Dockerfile
+    container_name: prisma
+    restart: always
+    environment:
+      DATABASE_URL: mongodb://mongo:27017/${MONGO_INITDB_DATABASE}?replicaSet=rs0
+      DOCKER_ENV: "true"
+    ports:
+      - "3000:3000"
+      - "5555:5555"
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+# -------
+  typeorm:
+    build:
+      context: ./typeorm
+      dockerfile: Dockerfile
+    container_name: typeorm
+    restart: always
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: 3002
+      DATABASE_URL: mongodb://mongo:27017/${MONGO_INITDB_DATABASE}?replicaSet=rs0
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET}
+      REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET}
+      ACCESS_TOKEN_INTERVAL: ${ACCESS_TOKEN_INTERVAL}
+      REFRESH_TOKEN_INTERVAL: ${REFRESH_TOKEN_INTERVAL}
+    ports:
+      - "3002:3002"
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+volumes:
+  mongo-data:
+
+networks:
+  app-network:
+    driver: bridge

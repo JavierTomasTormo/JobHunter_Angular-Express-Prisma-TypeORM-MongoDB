@@ -1,0 +1,29 @@
+<div class="comments-section">
+    <h3>Comentarios</h3>
+
+    <div *ngFor="let comment of comments" class="comment">
+        <p *ngIf="comment?.body">{{ comment.body }}</p> <!-- Added safe navigation operator -->
+        <div class="comment-meta">
+            <span *ngIf="isLoggedIn">
+                <a *ngIf="comment?.author" [routerLink]="['/profile', comment.author.username]">
+                    <img [src]="comment.author.image || 'https://via.placeholder.com/30'" alt="author image" class="comment-author-img" />
+                </a>
+                <span *ngIf="comment?.author">{{ comment.author.username }} ({{ comment.author.city }})</span> <!-- Show city safely -->
+            </span>
+            <span *ngIf="!isLoggedIn">Usuario anónimo</span>
+            <span *ngIf="comment?.createdAt">{{ comment.createdAt | date: 'longDate' }}</span>
+
+            <span class="mod-options" *ngIf="isLoggedIn && comment?.author?.username === currentUsername">
+                <button class="delete-button" (click)="deleteComment(comment.id)">Eliminar</button>
+            </span>
+        </div>
+    </div>
+
+    <div *ngIf="isLoggedIn" class="comment-form">
+        <textarea [(ngModel)]="newComment" placeholder="Escribe tu comentario..."></textarea>
+        <button (click)="addComment()">Comentar</button>
+    </div>
+    <div *ngIf="!isLoggedIn" class="login-message">
+        <p>Debes estar logeado para comentar.</p>
+    </div>
+</div>

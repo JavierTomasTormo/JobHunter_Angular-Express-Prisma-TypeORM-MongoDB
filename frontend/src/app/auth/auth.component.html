@@ -1,0 +1,48 @@
+<div class="auth-page">
+  <div class="container">
+    <h1>{{ title }}</h1>
+    <p class="text-xs-center">
+      <a [routerLink]="['/login']" *ngIf="authType === 'register'">¿Tienes una cuenta?</a>
+      <a [routerLink]="['/register']" *ngIf="authType === 'login'">¿Necesitas una cuenta?</a>
+    </p>
+
+    <app-list-errors [errors]="errors.errors"></app-list-errors>
+
+    <form [formGroup]="authForm" (ngSubmit)="submitForm()">
+      <fieldset [disabled]="isSubmitting">
+        <div class="form-group" *ngIf="authType === 'register'">
+          <input formControlName="username" placeholder="Nombre de usuario" class="form-control" type="text" />
+        </div>
+
+        <div class="form-group">
+          <input formControlName="email" placeholder="Email" class="form-control" type="text" />
+        </div>
+
+        <div class="form-group">
+          <input formControlName="password" placeholder="Contraseña" class="form-control" type="password" />
+        </div>
+
+        <!-- registro de empresas -->
+        <div class="form-group" *ngIf="authType === 'register'">
+          <label>
+            <input type="checkbox" formControlName="isEnterprise" />
+            ¿Quieres unirte como empresa?
+          </label>
+        </div>
+
+        <button class="btn" [disabled]="!authForm.valid" type="submit">{{ title }}</button>
+      </fieldset>
+    </form>
+
+    <div class="social-login">
+      <a class="social-btn google-btn">
+        <img src="social_login/cromo.png" alt="Google">
+        <span>Google</span>
+      </a>
+      <a class="social-btn github-btn">
+        <img src="social_login/github.png" alt="GitHub">
+        <span>GitHub</span>
+      </a>
+    </div>
+  </div>
+</div>

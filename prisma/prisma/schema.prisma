@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider      = "mongodb"
+  url           = env("DATABASE_URL")
+  relationMode  = "prisma"
+}
+
+model UserEnterprise {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  username    String    @unique
+  email       String    @unique
+  password    String
+  usertype    String    @default("enterprise")
+  isActive    Boolean   @default(true)
+  permissions String[]
+  telephone   String?
+  followers   Int       @default(0)
+  description String?
+  industry    String?
+  location    String?
+  logo        String?
+  website     String?
+  image       String?
+  slug        String?
+  category    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  offerts     Offert[]
+
+}
+
+
+model Offert {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  user          UserEnterprise @relation(fields: [userId], references: [id])
+  userId        String         @db.ObjectId
+  title         String
+  location      String
+  description   String?
+  requirements  String[]
+  salary        Float?
+  slug          String         @unique
+  category      String?
+  categorySlug  String?
+  company       String?
+  company_slug  String?
+  postedDate    DateTime?
+  image         String?
+  images        String[]
+  contractType  String?
+  experience    String?
+  applicants    Applicant[]
+  comments      String[]       @db.ObjectId
+  createdAt     DateTime       @default(now())
+  isActive      Boolean        @default(true)
+
+  // Nuevos campos
+  favouritesCount Int          @default(0)        // Para contar favoritos
+  favorites       String[]     @db.ObjectId       // Array de IDs de usuarios que han dado like
+
+  @@map("offerts")
+}
+
+
+
+model Category {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  description   String?
+  isActive      Boolean  @default(true)
+  jobCount      Int      @default(0)
+  slug          String   @unique
+  image         String?
+  subcategories String[]  // Puedes mantener esto si es necesario
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("categorys") // Asegúrate de que el nombre de la colección sea "categorys"
+}
+
+model Applicant {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  offert    Offert   @relation(fields: [offertId], references: [id])
+  offertId  String   @db.ObjectId
+  userId    String   @db.ObjectId
+  timestamp DateTime @default(now())
+  status    String   @default("Pending")
+}
